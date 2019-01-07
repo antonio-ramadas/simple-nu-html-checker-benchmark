@@ -1,5 +1,7 @@
 import java.io.StringReader
 
+import scala.util.Try
+
 import nu.validator.messages.types.MessageType
 import nu.validator.messages.{MessageEmitter, MessageEmitterAdapter}
 import nu.validator.validation.SimpleDocumentValidator
@@ -41,11 +43,12 @@ case class NuHtmlChecker() {
          |</html>
        """.stripMargin
 
-    validator.checkHtmlInputSource(new InputSource(new StringReader(html)))
+    Try { validator.checkHtmlInputSource(new InputSource(new StringReader(html))) }
+      .map(_ => errorHandler.getErrors == 0 && errorHandler.getFatalErrors == 0)
+      .recover{ case _ => false }
+      .get
 
     // errorHandler.end("Success!", "The document probably has some errors", "")
-
-    errorHandler.getErrors == 0 && errorHandler.getFatalErrors == 0
   }
 
   private def getErrorHandler(validator: SimpleDocumentValidator): MessageEmitterAdapter = {
@@ -61,12 +64,12 @@ case class NuHtmlChecker() {
 object NuHtmlChecker {
   val validBody: String =
     """
-      |<p>Parsed HTML into a doc.</p>
+      |<p>This is a valid body!</p>
     """.stripMargin('|')
 
   val invalidBody: String =
     """
-      |Parsed HTML into a doc.</p>
+      |Missing opening tag.</p>
     """.stripMargin('|')
 }
 
