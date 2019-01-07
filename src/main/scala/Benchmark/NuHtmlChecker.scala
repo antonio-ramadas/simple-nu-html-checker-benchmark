@@ -1,18 +1,13 @@
+package Benchmark
+
 import java.io.StringReader
 
 import scala.util.Try
 
-import nu.validator.messages.types.MessageType
-import nu.validator.messages.{MessageEmitter, MessageEmitterAdapter}
+import nu.validator.messages.MessageEmitterAdapter
 import nu.validator.validation.SimpleDocumentValidator
-import org.xml.sax.helpers.DefaultHandler
 import org.xml.sax.InputSource
-
-object VoidMessageEmitter extends MessageEmitter {
-  def startMessage(`type`: MessageType, systemId: String, oneBasedFirstLine: Int, oneBasedFirstColumn: Int, oneBasedLastLine: Int, oneBasedLastColumn: Int, exact: Boolean): Unit = ()
-
-  def endMessage(): Unit = ()
-}
+import org.xml.sax.helpers.DefaultHandler
 
 case class NuHtmlChecker() {
   val schemaUrl = "http://s.validator.nu/html5-rdfalite.rnc"
@@ -29,7 +24,7 @@ case class NuHtmlChecker() {
   validator.setUpMainSchema(schemaUrl, new DefaultHandler())
   validator.setUpValidatorAndParsers(errorHandler, false, false)
 
-  def isValidHtmlBody(htmlBody: String): Boolean = {
+  def isValidHtmlBody(htmlBody: String = ""): Boolean = {
     val html =
       s"""
          |<!DOCTYPE html>
@@ -71,13 +66,4 @@ object NuHtmlChecker {
     """
       |Missing opening tag.</p>
     """.stripMargin('|')
-}
-
-object Benchmark {
-  def main(args: Array[String]): Unit = {
-    val htmlChecker = NuHtmlChecker()
-
-    println(htmlChecker.isValidHtmlBody(NuHtmlChecker.validBody))
-    println(htmlChecker.isValidHtmlBody(NuHtmlChecker.invalidBody))
-  }
 }
